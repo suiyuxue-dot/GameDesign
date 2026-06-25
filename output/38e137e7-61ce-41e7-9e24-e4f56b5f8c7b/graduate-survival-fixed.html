@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>研究生求生录 - Graduate Survival Record</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: #e0e0e0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Start Screen */
+        .start-screen {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .start-content {
+            text-align: center;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            border: 2px solid #ffd700;
+            backdrop-filter: blur(10px);
+        }
+
+        .start-title {
+            color: #ffd700;
+            font-size: 36px;
+            margin-bottom: 20px;
+        }
+
+        .start-description {
+            color: #e0e0e0;
+            font-size: 18px;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .start-button {
+            padding: 15px 40px;
+            background: linear-gradient(145deg, #ffd700, #ffaa00);
+            border: none;
+            border-radius: 10px;
+            color: #1a1a2e;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .start-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(255, 215, 0, 0.5);
+        }
+
+        /* Game Screen */
+        .game-screen {
+            display: none;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            color: #ffd700;
+            font-size: 24px;
+        }
+
+        .week-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .progress-bar {
+            width: 200px;
+            height: 10px;
+            background: #333;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff6b6b, #ffd700, #4caf50);
+            transition: width 0.3s;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 250px 1fr 300px;
+            gap: 20px;
+        }
+
+        .panel {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .panel-title {
+            color: #ffd700;
+            font-size: 18px;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .stat-item {
+            margin-bottom: 15px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #888;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .satisfaction-bar {
+            width: 100%;
+            height: 20px;
+            background: #333;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .satisfaction-fill {
+            height: 100%;
+            transition: width 0.3s, background-color 0.3s;
+            border-radius: 10px;
+        }
+
+        .cards-area {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .action-card {
+            flex: 1;
+            background: linear-gradient(145deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05));
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 120px;
+        }
+
+        .action-card:hover {
+            border-color: #ffd700;
+            transform: translateY(-5px);
+        }
+
+        .action-card.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .card-title {
+            color: #ffd700;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .card-description {
+            font-size: 12px;
+            color: #aaa;
+            margin-bottom: 8px;
+        }
+
+        .card-cost {
+            font-size: 14px;
+            color: #ff6b6b;
+            font-weight: bold;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .main-button {
+            padding: 12px 24px;
+            background: linear-gradient(145deg, #ffd700, #ffaa00);
+            border: none;
+            border-radius: 8px;
+            color: #1a1a2e;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .main-button:hover {
+            transform: translateY(-3px);
+        }
+
+        .main-button:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+
+        .clues-area {
+            padding: 10px;
+            background: rgba(255, 215, 0, 0.05);
+            border-radius: 5px;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+
+        .clue-item {
+            font-size: 13px;
+            padding: 8px;
+            margin-bottom: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+
+        .crisis-panel {
+            background: rgba(255, 107, 107, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            border: 2px solid rgba(255, 107, 107, 0.3);
+            margin-top: 15px;
+            display: none;
+        }
+
+        .crisis-panel.active {
+            display: block;
+        }
+
+        .crisis-title {
+            color: #ff6b6b;
+            font-size: 18px;
+            margin-bottom: 10px;
+            font-weight: bold;
+    }
+
+        .item-card {
+            padding: 8px;
+            margin-bottom: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            font-size: 12px;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+        }
+
+        .item-name {
+            color: #ffd700;
+            font-weight: bold;
+            margin-bottom: 3px;
+    }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            background: rgba(255, 215, 0, 0.9);
+            border-radius: 8px;
+            color: #1a1a2e;
+            font-size: 16px;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            z-index: 1001;
+            animation: slideIn 0.3s ease-out;
+            display: none;
+        }
+
+        .notification.active {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Start Screen -->
+    <div class="start-screen" id="startScreen">
+        <div class="start-content">
+            <h1 class="start-title">🎓 研究生求生录</h1>
+            <div class="start-description">
+                <p>在信息不对称与资源压迫下，与导师斗智斗勇</p>
+                <p>每周5点精力，在完成导师任务与发展自己Build之间抉择</p>
+                <p>通过卡牌选择构建策略，在危机中存活或翻盘</p>
+            </div>
+            <button class="start-button" onclick="startGame()">开始游戏</button>
+        </div>
+    </div>
+
+    <!-- Game Screen -->
+    <div class="game-screen" id="gameScreen">
+        <div class="container">
+            <div class="header">
+                <h1>🎓 研究生求生录</h1>
+                <div class="week-info">
+                    <span>第 <strong id="weekNum">1</strong> 周</span>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="weekProgress" style="width: 8.33%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="main-content">
+                <!-- Status Panel -->
+                <div class="panel">
+                    <div class="panel-title">📊 状态面板</div>
+                    <div class="stat-item">
+                        <div class="stat-label">满意度</div>
+                        <div class="stat-value" id="satisfactionValue">50</div>
+                        <div class="satisfaction-bar">
+                            <div class="satisfaction-fill" id="satisfactionFill" style="width: 50%; background: linear-gradient(90deg, #ff6b6b, #ffd700);"></div>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">精力</div>
+                        <div class="stat-value"><span id="energyValue">5</span> / <span id="energyMax">5</span></div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">学术声望</div>
+                        <div class="stat-value" id="prestigeValue">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">论文进度</div>
+                        <div class="stat-value" id="paperProgress">0 次</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">人脉值</div>
+                        <div class="stat-value" id="networkValue">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">情报值</div>
+                        <div class="stat-value" id="intelValue">0</div>
+                    </div>
+                </div>
+
+                <!-- Action Panel -->
+                <div class="panel">
+                    <div class="panel-title">🎯 本周行动</div>
+                    <div class="cards-area" id="cardsArea">
+                        <!-- Action cards will be generated here -->
+                    </div>
+                    <div class="action-buttons">
+                        <button class="main-button" id="endWeekBtn" onclick="endWeek()">结束本周</button>
+                    </div>
+                    <div class="crisis-panel" id="crisisPanel">
+                        <div class="crisis-title" id="crisisTitle">⚠️ 危机事件</div>
+                        <div id="crisisContent"></div>
+                        <div class="action-buttons" id="crisisButtons"></div>
+                    </div>
+                    <div class="panel-title" style="margin-top: 20px;">🎒 道具</div>
+                    <div id="itemsPanel"></div>
+                </div>
+
+                <!-- Supervisor Panel -->
+                <div class="panel">
+                    <div class="panel-title">👨‍🏫 导师信息</div>
+                    <div class="stat-item">
+                        <div class="stat-label">期望方向</div>
+                        <div class="stat-value" id="expectationValue">❓ 未知</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">压力阈值</div>
+                        <div class="stat-value" id="thresholdValue">❓ 未知</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">奖励偏好</div>
+                        <div class="stat-value" id="preferenceValue">❓ 未知</div>
+                    </div>
+                    <div class="clues-area">
+                        <div style="color: #ffd700; font-size: 14px; margin-bottom: 8px;">💡 本周线索</div>
+                        <div id="cluesArea"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div class="notification" id="notification"></div>
+
+    <script>
+        // Game State
+        let gameState = {
+            week: 1,
+            maxWeek: 12,
+            satisfaction: 50,
+            energy: 5,
+            maxEnergy: 5,
+            prestige: 0,
+            paperProgress: 0,
+            network: 0,
+            intel: 0,
+            items: [],
+            supervisor: null,
+            currentWeekActions: [],
+            crisisTriggered: false,
+            crisisResolved: false
+        };
+
+        // Actions
+        const actions = [
+            { id: 'completeTask', name: '完成导师任务', description: '根据导师期望获得满意度', cost: 2 },
+            { id: 'advancePaper', name: '推进论文研究', description: '推进论文进度，累计发表次数', cost: 2 },
+            { id: 'investigate', name: '调查导师线索', description: '收集关于导师的信息', cost: 1 },
+            { id: 'expandNetwork', name: '拓展人脉关系', description: '与同门建立关系', cost: 1 },
+            { id: 'rest', name: '休息调整', description: '休息以恢复精力', cost: 0 }
+        ];
+
+        // Items
+        const allItems = [
+            { id: 'I-01', name: '论文自动存档', rarity: '非凡', effect: '每周推进论文≥2次时，额外满意度+3' },
+            { id: 'A-01', name: '周报模板', rarity: '普通', effect: '本周完成导师任务费用-1' },
+            { id: 'A-02', name: '恭维话术', rarity: '普通', effect: '使用时满意度+5' },
+            { id: 'P-01', name: '满意度护盾', rarity: '普通', effect: '本周第一次满意度降低量减半' }
+        ];
+
+        // Crisis Events
+        const crisisEvents = [
+            { id: 'groupMeeting', name: '组会被怼', level: 1, description: '在组会上被导师批评', impact: '满意度-10' },
+            { id: 'urgentRevision', name: '紧急改稿令', level: 2, description: '导师突然要求大幅修改', impact: '下周精力-1，论文进度-2' },
+            { id: 'supervisorAway', name: '导师出差失联', level: 2, description: '导师出差期间无法联系', impact: '本周导师任务无效' }
+        ];
+
+        // Clues
+        const clues = [
+            { text: '导师最近经常提及论文发表的重要性' },
+            { text: '导师在会议上强调平衡发展' },
+            { text: '导师很看重学生的人脉网络' },
+            { text: '导师对学生的压力承受能力有要求' }
+        ];
+
+        // Start Game
+        function startGame() {
+            document.getElementById('startScreen').style.display = 'none';
+            document.getElementById('gameScreen').style.display = 'block';
+
+            // Initialize game state
+            gameState.week = 1;
+            gameState.satisfaction = 50;
+            gameState.energy = 5;
+            gameState.prestige = 0;
+            gameState.paperProgress = 0;
+            gameState.network = 0;
+            gameState.intel = 0;
+            gameState.items = [];
+            gameState.supervisor = generateSupervisor();
+            gameState.currentWeekActions = [];
+            gameState.crisisTriggered = false;
+            gameState.crisisResolved = false;
+
+            updateUI();
+            generateCards();
+            showNotification('🎓 新学期开始！祝你好运！');
+        }
+
+        // Generate Supervisor
+        function generateSupervisor() {
+            const expectations = ['论文型', '平衡型', '人脉型'];
+            const thresholds = [30, 40, 50];
+            const preferences = ['道具奖励型', '声望奖励型', '能力奖励型'];
+
+            return {
+                expectation: expectations[Math.floor(Math.random() * 3)],
+                threshold: thresholds[Math.floor(Math.random() * 3)],
+                preference: preferences[Math.floor(Math.random() * 3)],
+                revealed: { expectation: false, threshold: false, preference: false }
+            };
+        }
+
+        // Update UI
+        function updateUI() {
+            document.getElementById('weekNum').textContent = gameState.week;
+            document.getElementById('weekProgress').style.width = `${(gameState.week / gameState.maxWeek) * 100}%`;
+
+            document.getElementById('satisfactionValue').textContent = gameState.satisfaction;
+            document.getElementById('satisfactionFill').style.width = `${gameState.satisfaction}%`;
+
+            // Satisfaction color
+            if (gameState.satisfaction >= 80) {
+                document.getElementById('satisfactionFill').style.background = 'linear-gradient(90deg, #4caf50, #8bc34a)';
+            } else if (gameState.satisfaction >= 60) {
+                document.getElementById('satisfactionFill').style.background = 'linear-gradient(90deg, #ffd700, #ffaa00)';
+            } else if (gameState.satisfaction >= 40) {
+                document.getElementById('satisfactionFill').style.background = 'linear-gradient(90deg, #ff9800, #ff6b6b)';
+            } else {
+                document.getElementById('satisfactionFill').style.background = 'linear-gradient(90deg, #ff6b6b, #f44336)';
+            }
+
+            document.getElementById('energyValue').textContent = gameState.energy;
+            document.getElementById('prestigeValue').textContent = gameState.prestige;
+            document.getElementById('paperProgress').textContent = `${gameState.paperProgress} 次`;
+            document.getElementById('networkValue').textContent = gameState.network;
+            document.getElementById('intelValue').textContent = gameState.intel;
+
+            // Supervisor info
+            const sup = gameState.supervisor;
+            document.getElementById('expectationValue').textContent = sup.revealed.expectation ? sup.expectation : '❓ 未知';
+            document.getElementById('thresholdValue').textContent = sup.revealed.threshold ? sup.threshold : '❓ 未知';
+            document.getElementById('preferenceValue').textContent = sup.revealed.preference ? sup.preference : '❓ 未知';
+
+            // Update clues
+            updateClues();
+
+            // Update items
+            updateItems();
+
+            // Update crisis panel
+            if (gameState.crisisTriggered && !gameState.crisisResolved) {
+                document.getElementById('crisisPanel').classList.add('active');
+            } else {
+                document.getElementById('crisisPanel').classList.remove('active');
+            }
+
+            // Check end week button
+            document.getElementById('endWeekBtn').disabled = gameState.crisisTriggered && !gameState.crisisResolved;
+        }
+
+        // Update Clues
+        function updateClues() {
+            const cluesArea = document.getElementById('cluesArea');
+            cluesArea.innerHTML = '';
+            
+            const numClues = Math.floor(Math.random() * 2) + 1;
+            for (let i = 0; i < numClues; i++) {
+                const clue = clues[Math.floor(Math.random() * clues.length)];
+                const clueDiv = document.createElement('div');
+                clueDiv.className = 'clue-item';
+                clueDiv.textContent = clue.text;
+                cluesArea.appendChild(clueDiv);
+            }
+        }
+
+        // Update Items
+        function updateItems() {
+            const itemsPanel = document.getElementById('itemsPanel');
+            itemsPanel.innerHTML = '';
+
+            if (gameState.items.length === 0) {
+                itemsPanel.innerHTML = '<div style="color: #888; font-size: 12px;">暂无道具</div>';
+                return;
+            }
+
+            gameState.items.forEach(item => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'item-card';
+                itemDiv.innerHTML = `<div class="item-name">${item.name} (${item.rarity})</div><div style="color: #aaa; font-size: 11px;">${item.effect}</div>`;
+                itemsPanel.appendChild(itemDiv);
+            });
+        }
+
+        // Generate Cards
+        function generateCards() {
+            const cardsArea = document.getElementById('cardsArea');
+            cardsArea.innerHTML = '';
+
+            actions.forEach(action => {
+                const card = document.createElement('div');
+                card.className = 'action-card';
+                card.id = `card-${action.id}`;
+
+                const canUse = gameState.energy >= action.cost;
+                if (!canUse) {
+                    card.classList.add('disabled');
+                }
+
+                card.innerHTML = `
+                    <div class="card-title">${action.name}</div>
+                    <div class="card-description">${action.description}</div>
+                    <div class="card-cost">消耗: ${action.cost} 精力</div>
+                `;
+
+                if (canUse) {
+                    card.onclick = () => executeAction(action);
+                }
+
+                cardsArea.appendChild(card);
+            });
+        }
+
+        // Execute Action
+        function executeAction(action) {
+            if (gameState.energy < action.cost) {
+                showNotification('⚠️ 精力不足！');
+                return;
+            }
+
+            gameState.energy -= action.cost;
+            gameState.currentWeekActions.push(action.id);
+
+            applyActionEffect(action);
+
+            updateUI();
+            generateCards();
+            showNotification(`✅ 已执行：${action.name}`);
+        }
+
+        // Apply Action Effect
+        function applyActionEffect(action) {
+            const sup = gameState.supervisor;
+
+            switch (action.id) {
+                case 'completeTask':
+                    let matchDegree = 0.33;
+                    if (sup.revealed.expectation) {
+                        if (sup.expectation === '论文型') matchDegree = 1.0;
+                        else if (sup.expectation === '平衡型') matchDegree = 0.66;
+                        else matchDegree = 0.33;
+                    }
+
+                    const satisfactionChange = Math.round((matchDegree - 0.33) * 30);
+                    gameState.satisfaction += Math.max(-15, Math.min(15, satisfactionChange));
+                    gameState.satisfaction = Math.max(0, Math.min(100, gameState.satisfaction));
+                    gameState.prestige += 4;
+                    break;
+
+                case 'advancePaper':
+                    gameState.paperProgress += 1;
+                    if (Math.random() > 0.5) {
+                        gameState.satisfaction += 2;
+                    }
+                    gameState.prestige += 3;
+                    break;
+
+                case 'investigate':
+                    if (Math.random() < 0.8) {
+                        const attributes = ['expectation', 'threshold', 'preference'];
+                        const unrevealed = attributes.filter(attr => !sup.revealed[attr]);
+                        if (unrevealed.length > 0) {
+                            const attrToReveal = unrevealed[Math.floor(Math.random() * unrevealed.length)];
+                            sup.revealed[attrToReveal] = true;
+                            showNotification('🔍 揭示了导师的新属性！');
+                        }
+                    }
+                    gameState.intel += 1;
+                    break;
+
+                case 'expandNetwork':
+                    gameState.network += 1;
+                    if (gameState.network >= 3 && Math.random() > 0.6) {
+                        gameState.prestige += 2;
+                    }
+                    break;
+
+                case 'rest':
+                    break;
+            }
+        }
+
+        // End Week
+        function endWeek() {
+            if (gameState.crisisTriggered && !gameState.crisisResolved) {
+                showNotification('⚠️ 请先处理危机事件！');
+                return;
+            }
+
+            // Check crisis trigger
+            const triggerRate = 0.3 * (1 - (gameState.satisfaction / 100) * 0.5);
+            if (Math.random() < triggerRate) {
+                triggerCrisis();
+            }
+
+            // Reset energy and actions
+            gameState.energy = gameState.maxEnergy;
+            gameState.currentWeekActions = [];
+
+            // Advance week
+            gameState.week++;
+
+            // Check for assessments
+            if (gameState.week === 5) {
+                checkInitialAssessment();
+            } else if (gameState.week === 9) {
+                checkMidtermAssessment();
+            } else if (gameState.week === 13) {
+                checkFinalAssessment();
+            }
+
+            // Check game end
+            if (gameState.satisfaction <= 0) {
+                showNotification('💔 满意度降至0，被迫退学！');
+                setTimeout(() => location.reload(), 2000);
+                return;
+            }
+
+            if (gameState.week > gameState.maxWeek) {
+                showNotification('🎓 恭喜毕业！');
+                setTimeout(() => location.reload(), 2000);
+                return;
+            }
+
+            updateUI();
+            generateCards();
+        }
+
+        // Trigger Crisis
+        function triggerCrisis() {
+            gameState.crisisTriggered = true;
+            const crisis = crisisEvents[Math.floor(Math.random() * crisisEvents.length)];
+            displayCrisis(crisis);
+        }
+
+        // Display Crisis
+        function displayCrisis(crisis) {
+            document.getElementById('crisisTitle').textContent = `⚠️ ${crisis.name} (${crisis.level}级)`;
+            document.getElementById('crisisContent').innerHTML = `
+                <div style="color: #e0e0e0; font-size: 14px; margin-bottom: 10px;">${crisis.description}</div>
+                <div style="color: #ff6b6b; font-size: 14px; margin-bottom: 15px;">影响: ${crisis.impact}</div>
+            `;
+
+            const buttonsArea = document.getElementById('crisisButtons');
+            buttonsArea.innerHTML = '';
+
+            const responses = [
+                { text: '积极应对', effect: () => { gameState.satisfaction -= crisis.level * 3; gameState.prestige += crisis.level * 2; } },
+                { text: '消极应对', effect: () => { gameState.satisfaction -= crisis.level * 5; } },
+                { text: '使用道具', effect: () => { const crisisItem = gameState.items.find(i => i.effect.includes('危机') || i.effect.includes('护盾')); if (crisisItem) { gameState.satisfaction -= crisis.level * 2; } else { gameState.satisfaction -= crisis.level * 4; } } }
+            ];
+
+            responses.forEach(response => {
+                const button = document.createElement('button');
+                button.className = 'main-button';
+                button.textContent = response.text;
+                button.style.padding = '8px 16px';
+                button.style.fontSize = '14px';
+                button.onclick = () => {
+                    response.effect();
+                    gameState.satisfaction = Math.max(0, Math.min(100, gameState.satisfaction));
+                    gameState.crisisResolved = true;
+                    showNotification('✅ 危机已处理！');
+                    updateUI();
+                };
+                buttonsArea.appendChild(button);
+            });
+        }
+
+        // Check Assessments
+        function checkInitialAssessment() {
+            if (gameState.satisfaction >= 40) {
+                showNotification('🏆 期初考核通过！获得奖励道具！');
+                gameState.prestige += 15;
+                giveRandomItem();
+            } else {
+                showNotification('⚠️ 期初考核失败！满意度-20');
+                gameState.satisfaction -= 20;
+            }
+        }
+
+        function checkMidtermAssessment() {
+            if (gameState.satisfaction >= 55 && gameState.paperProgress >= 4) {
+                showNotification('🏆 中期答辩通过！获得奖励道具！');
+                gameState.prestige += 20;
+                giveRandomItem();
+            } else {
+                showNotification('⚠️ 中期答辩未通过！满意度-25');
+                gameState.satisfaction -= 25;
+            }
+        }
+
+        function checkFinalAssessment() {
+            if (gameState.satisfaction >= 65 && gameState.paperProgress >= 10) {
+                showNotification('🎓 恭喜毕业！学术声望+' + (gameState.prestige + 30));
+            } else {
+                showNotification('⚠️ 毕业答辩未通过！进入延毕阶段...');
+                gameState.maxWeek = 16;
+            }
+        }
+
+        // Give Random Item
+        function giveRandomItem() {
+            const availableItems = allItems.filter(item => !gameState.items.find(i => i.id === item.id));
+            if (availableItems.length > 0) {
+                const randomItem = availableItems[Math.floor(Math.random() * availableItems.length)];
+                gameState.items.push(randomItem);
+                showNotification(`🎁 获得道具：${randomItem.name}！`);
+            }
+        }
+
+        // Show Notification
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.classList.add('active');
+
+            setTimeout(() => {
+                notification.classList.remove('active');
+            }, 3000);
+    }
+
+    // Initialize
+    window.onload = function() {
+        document.getElementById('startScreen').style.display = 'flex';
+        document.getElementById('gameScreen').style.display = 'none';
+    };
+    </script>
+</body>
+</html>
